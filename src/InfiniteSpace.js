@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
 import axios from 'axios';
 
 const API_KEY = process.env.REACT_APP_DEMO_KEY;
@@ -15,6 +17,7 @@ export function InfiniteSpace() {
       );
       setApods(data.photos);
       setPage(2);
+      console.log(data.photos);
     }
     fetchData();
   }, []);
@@ -47,17 +50,19 @@ export function InfiniteSpace() {
     setIsFetching(false);
   }
 
-  function logs() {
-    console.log(apods);
-  }
-
   return (
     <>
       <h1>InfiniteSpace here</h1>
-      <button onClick={logs}>logs</button>
-      {apods.map((a) => (
-        <img src={a.img_src} alt='rover' key={a.id} />
-      ))}
+      <Container maxWidth='sm'>
+        {apods.map((a) => (
+          <img
+            src={a.img_src}
+            alt='rover'
+            key={a.id}
+            style={{ maxWidth: '100%', maxHeight: '100%' }}
+          />
+        ))}
+      </Container>
     </>
   );
 }
