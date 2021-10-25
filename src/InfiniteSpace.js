@@ -5,18 +5,50 @@ const API_KEY = process.env.REACT_APP_DEMO_KEY;
 
 export function InfiniteSpace() {
   const [apods, setApods] = useState([{ hello: 'hi' }]);
+  const [isFetching, setIsFetching] = useState(false);
+  const [page, setPage] = useState(1);
 
-  // useEffect(()=>{
-  //     const data = axios.get(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&camera=fhaz&api_key=${process.env.DEMO_KEY}`)
-  //     console.log(data)
-  // })
+  useEffect(() => {
+    async function fetchData() {
+      const { data } = await axios.get(
+        `https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&page=1&api_key=${API_KEY}`
+      );
+      setApods(data.photos);
+      setPage(2);
+    }
+    fetchData();
+  }, []);
 
-  async function logs() {
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!isFetching) return;
+    fetchMoreListItems();
+  }, [isFetching]);
+
+  function handleScroll() {
+    if (
+      window.innerHeight + document.documentElement.scrollTop !==
+      document.documentElement.offsetHeight
+    )
+      return;
+    setIsFetching(true);
+  }
+
+  async function fetchMoreListItems() {
     const { data } = await axios.get(
-      `https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&api_key=${API_KEY}`
+      `https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=1000&page=${page}&api_key=${API_KEY}`
     );
-    setApods(data.photos);
-    console.log(data);
+    setApods([...apods, ...data.photos]);
+    setPage(page + 1);
+    setIsFetching(false);
+  }
+
+  function logs() {
+    console.log(apods);
   }
 
   return (
@@ -24,7 +56,7 @@ export function InfiniteSpace() {
       <h1>InfiniteSpace here</h1>
       <button onClick={logs}>logs</button>
       {apods.map((a) => (
-        <h3>{a.id}</h3>
+        <img src={a.img_src} alt='rover' key={a.id} />
       ))}
     </>
   );
